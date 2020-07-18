@@ -1,0 +1,53 @@
+.html {
+	font-family: 'Arial', sans-serif;
+}
+
+.update {
+	display:none;
+}
+
+.show {
+	display:block;
+}
+
+.target-letter {
+	font-size: 100pt;
+}
+
+.solutions {
+	display: flex;
+}
+
+.solution-image {
+	font-size: 72pt;
+}
+
+.solution-text {
+	font-size: 42pt;
+	color: black;
+}
+
+.solution-text::before {
+	color: green;
+	content: "a";
+}
+
+
+.selected-incorrect {
+	filter: saturate(0%);
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.selected-correct {
+	animation: anim-glory;
+	animation-direction: alternate;
+	animation-duration: 0.5s;
+	animation-iteration-count: infinite;
+	animation-timing-function: ease-in-out;
+}
+
+@keyframes anim-glory {
+	from {box-shadow: 0px 0px 20px green;}
+	to {box-shadow: 0px 0px 80px green;}
+}
