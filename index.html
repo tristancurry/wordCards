@@ -14,46 +14,79 @@
 	<script type='text/javascript' src='scripts/swHandling.js'></script>
 
 	<div onclick='void(0);'>
-		<div class='card'>
-			<div class='target-letter'>a</div>
-			<div class='solutions'>
-				<div class='solution selected-incorrect'>
-					<div class='solution-image'>👶</div>
-					<div class='solution-text'>aby</div>
-					<div class='solution-audio'></div>
-				</div>
-				<div class='solution selected-correct'>
-					<div class='solution-image'>🐜</div>
-					<div class='solution-text'><span>nt</span></div>
-					<div class='solution-audio'></div>
-				</div>
-				<div class='solution'>
-					<div class='solution-image'>🐈</div>
-					<div class='solution-text'>at</div>
-					<div class='solution-audio'></div>
-				</div>
-			</div>
-		</div>
 		<div class='update'>update ready!<button id='updateBtn'>UPDATE</button></div>
-
+		<div class='solutions'></div>
 	</div>
 
 <script type="text/javascript">
 const wordbase = [
-	{word: 'ant', syl:1, char: '🐜'},
-	{word: 'cat', syl:1, char: '🐈'},
-	{word: 'baby', syl:2, char: '👶', skin: true},
-	{word: 'cow', syl:1, char: '🐄'},
-	{word: 'bird', syl:1, char: '🐦'},
-	{word: 'crab', syl:1, char: '🦀'},
+	{word: 'ant', syl: 1, char: '🐜'},
+	{word: 'cat', syl: 1, char: '🐈'},
+	{word: 'baby', syl: 2, char: '👶', skin: true},
+	{word: 'cow', syl: 1, char: '🐄'},
+	{word: 'bird', syl: 1, char: '🐦'},
+	{word: 'crab', syl: 1, char: '🦀'},
 	{word: 'bee', syl: 1, char: '🐝'},
-	{word: 'apple', syl:2, char: '🍎'},
-	{word: 'banana', syl:3, char: '🍌'},
-	
-
-
-
+	{word: 'apple', syl: 2, char: '🍎'},
+	{word: 'banana', syl: 3, char: '🍌'},
+	{word: 'car', syl: 1, char: '🚗'},
+	{word: 'aeroplane', syl: 3, char: '✈️'},
+	{word: 'astronaut', syl: 3, char: '👩‍🚀'}
 ]
+
+const findWordInfo = (word, wb) => {
+	return new Promise ((resolve, reject) => {
+		if(word) {
+		let wordInfo = wb.find(entry => entry.word.toLowerCase() == word.toLowerCase());
+		if(wordInfo) {
+			resolve(wordInfo);
+		} else {
+			const errMsg = `Word '${word}' not found in database!`;
+			throw errMsg;
+			reject(errMsg);
+		}
+	} else {
+		const errMsg = 'No word was specified! Could not find wordInfo in database';
+		throw errMsg;
+		reject(errMsg);
+	}
+	});
+}
+
+const buildSolutionMarkup = (wordInfo) => {
+	return new Promise ((resolve, reject) => {
+		if (wordInfo.char && wordInfo.word) {
+			let	markup = `<div class="solution">
+					<div class='solution-image'>${wordInfo.char}</div>
+					<div class='solution-text correct'>${wordInfo.word}</div>
+				</div>`;
+			resolve (markup);
+		} else {
+			let errMsg = 'wordInfo did not have the necessary information';
+			if(!wordInfo.word) {errMsg += ': \nword was not specified!';}
+			if(wordInfo.word && !wordInfo.char) {errMsg += ` for '${wordInfo.word}' \nImage was not specified!`;}
+			throw errMsg;
+			reject (errMsg);
+		}
+	});
+}
+
+let solutionsDiv = document.getElementsByClassName('solutions')[0];
+
+const renderSolution = (word, wb) => {
+	findWordInfo(word, wb)
+	.then(wordInfo => buildSolutionMarkup(wordInfo))
+	.then(markup => solutionsDiv.insertAdjacentHTML('beforeend', markup))
+	.catch(err => console.log(err));
+}
+
+let randomIncorrect = Math.floor((wordbase.length - 1)*Math.random());
+console.log(randomIncorrect);
+wordbase.forEach(entry => {
+	renderSolution(entry.word, wordbase);
+});
+
+
 
 
 </script>

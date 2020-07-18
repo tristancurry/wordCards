@@ -1,3 +1,8 @@
+:root {
+	--correct-text-colour: magenta;
+}
+
+
 .html {
 	font-family: 'Arial', sans-serif;
 }
@@ -16,10 +21,27 @@
 
 .solutions {
 	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 80%;
+	margin: auto;
+	border: 1px solid black;
+	background-image: linear-gradient(to bottom left, #ffdddd, #ddddff);
+}
+
+.solution {
+	display:flex;
+	flex-basis: content;
+	flex-direction: column;
+	align-items: center;
+	width: 50%;
+	border: 1px solid white;
+	border-radius: 20px;
 }
 
 .solution-image {
 	font-size: 72pt;
+	flex-grow: 0;
 }
 
 .solution-text {
@@ -27,9 +49,8 @@
 	color: black;
 }
 
-.solution-text::before {
-	color: green;
-	content: "a";
+.solution-text.correct::first-letter {
+	color: var(--correct-text-colour);
 }
 
 
