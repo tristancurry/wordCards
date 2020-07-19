@@ -52,6 +52,10 @@
 	color: black;
 }
 
+.solution-text::first-letter {
+	font-weight: bold;
+}
+
 .solution-text.correct::first-letter {
 	color: var(--colour-correct);
 }
@@ -66,7 +70,7 @@
 }
 
 .solution-container {
-	
+
 }
 
 .selected-correct {
