@@ -19,6 +19,29 @@
 	</div>
 
 <script type="text/javascript">
+
+const skinCodes = [
+	'',
+	'🏻',
+	'🏼',
+	'🏽',
+	'🏾',
+	'🏿',
+];
+
+const genderCodes = [
+	'👨',
+	'👩',
+];
+
+const hairCodes = [
+'',
+'🦰',
+'🦱',
+'🦳',
+'🦲',
+];
+
 const wordbase = [
 	{word: 'ant', syl: 1, char: '🐜'},
 	{word: 'cat', syl: 1, char: '🐈'},
@@ -30,9 +53,35 @@ const wordbase = [
 	{word: 'apple', syl: 2, char: '🍎'},
 	{word: 'banana', syl: 3, char: '🍌'},
 	{word: 'car', syl: 1, char: '🚗'},
-	{word: 'aeroplane', syl: 3, char: '✈️'},
-	{word: 'astronaut', syl: 3, char: '👩‍🚀'}
+	{word: 'plane', syl: 1, char: '✈️'},
+	{word: 'astronaut', syl: 3, char: '&zwj;🚀', skin: true, gender: true},
 ]
+
+const chooseRandomFeature = featureList => {
+	let selection = Math.floor((featureList.length)*Math.random());
+	if (selection == featureList.length) {selection = featureList.length - 1};
+	return featureList[selection];
+}
+
+const modifyCharString = wordInfo => {
+	let foreChar = '';
+	let aftChar = '';
+	if(wordInfo.gender){
+		foreChar += chooseRandomFeature(genderCodes);
+	}
+	if(wordInfo.skin){
+		if(wordInfo.gender){
+			foreChar += chooseRandomFeature(skinCodes);
+		} else {
+			aftChar += chooseRandomFeature(skinCodes);
+		}
+	}
+	if(wordInfo.hair){
+		aftChar += `&zwj;${chooseRandomFeature(hairCodes)}`;
+	}
+
+	return (foreChar + wordInfo.char + aftChar);
+}
 
 const findWordInfo = (word, wb) => {
 	return new Promise ((resolve, reject) => {
@@ -56,8 +105,9 @@ const findWordInfo = (word, wb) => {
 const buildSolutionMarkup = (wordInfo) => {
 	return new Promise ((resolve, reject) => {
 		if (wordInfo.char && wordInfo.word) {
+			let modChar = modifyCharString(wordInfo);
 			let	markup = `<div class="solution">
-					<div class='solution-image'>${wordInfo.char}</div>
+					<div class='solution-image'>${modChar}</div>
 					<div class='solution-text correct'>${wordInfo.word}</div>
 				</div>`;
 			resolve (markup);
@@ -71,23 +121,37 @@ const buildSolutionMarkup = (wordInfo) => {
 	});
 }
 
+
+
 let solutionsDiv = document.getElementsByClassName('solutions')[0];
 
-const renderSolution = (word, wb) => {
-	findWordInfo(word, wb)
-	.then(wordInfo => buildSolutionMarkup(wordInfo))
-	.then(markup => solutionsDiv.insertAdjacentHTML('beforeend', markup))
-	.catch(err => console.log(err));
+
+const renderWordbase = async (wb, targetElement) => {
+	let promises = [];
+	wb.forEach(entry => {
+		promises.push(buildSolutionMarkup(entry));
+	});
+
+	const results = await Promise.allSettled(promises);
+	console.log(results);
+	results.forEach(result => {
+		if (result.status == 'fulfilled') {
+			targetElement.insertAdjacentHTML('beforeend', result.value);
+		} else {
+			const err = new Error(result.reason);
+			console.error(err);
+		}
+	});
+
+	let randomIncorrect = Math.floor((results.length)*Math.random());
+	let solutionTexts = targetElement.getElementsByClassName('solution-text');
+	solutionTexts[randomIncorrect].classList.remove('correct');
+	solutionTexts[randomIncorrect].classList.add('incorrect');
+	solutionTexts[randomIncorrect].parentNode.classList.add('selected-incorrect');
+
 }
 
-let randomIncorrect = Math.floor((wordbase.length - 1)*Math.random());
-console.log(randomIncorrect);
-wordbase.forEach(entry => {
-	renderSolution(entry.word, wordbase);
-});
-
-
-
+renderWordbase(wordbase, solutionsDiv).catch(err => console.log(err));
 
 </script>
 </body>

@@ -1,10 +1,13 @@
 :root {
-	--correct-text-colour: magenta;
+	--colour-correct: magenta;
+	--colour-incorrect: blue;
+
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 
-.html {
-	font-family: 'Arial', sans-serif;
+.div {
+
 }
 
 .update {
@@ -50,14 +53,20 @@
 }
 
 .solution-text.correct::first-letter {
-	color: var(--correct-text-colour);
+	color: var(--colour-correct);
 }
-
+.solution-text.incorrect::first-letter {
+	color: var(--colour-incorrect);
+}
 
 .selected-incorrect {
 	filter: saturate(0%);
 	opacity: 0.5;
 	pointer-events: none;
+}
+
+.solution-container {
+	
 }
 
 .selected-correct {
@@ -69,6 +78,6 @@
 }
 
 @keyframes anim-glory {
-	from {box-shadow: 0px 0px 20px green;}
-	to {box-shadow: 0px 0px 80px green;}
+	from {box-shadow: 0px 0px 20px var(--colour-correct);}
+	to {box-shadow: 0px 0px 80px var(--colour-correct);}
 }
