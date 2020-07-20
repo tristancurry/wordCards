@@ -15,7 +15,6 @@
 
 	<div onclick='void(0);'>
 		<div class='update'>update ready!<button id='updateBtn'>UPDATE</button></div>
-		<div class='solutions'></div>
 	</div>
 
 <script type="text/javascript">
@@ -71,8 +70,7 @@ const filterWordbaseByLetter = (wb, letter) => {
 	return {matches, complement};
 }
 
-const updateRecentWordbase = (recent_wb, wordInfo, max) => {
-	if (!max) {max = MAX_RECENT_WORDS;}
+const updateRecentWordbase = (recent_wb, wordInfo, max = MAX_RECENT_WORDS) => {
 	if (wordInfo.word) {
 		recent_wb.push(wordInfo);
 		if (recent_wb.length > max) {
@@ -85,14 +83,72 @@ const updateRecentWordbase = (recent_wb, wordInfo, max) => {
 	return;
 }
 
-const renderProblem = async (problem, targetElement) => {
-	//put the targetLetter in the right spot
+//need an object to hold onto...
+//a wordbase from which problems are drawn
+//a complement_wb (if any)
+//a recent_wb (if any)
+//DOM element for rendering into
 
+//filter wordbase according to target letter. -store
+//shuffle matches - store shallow copy of matches
+
+
+const buildProblemSet = (wb, complement_wb, trackRecent = true) => {
+	let problemSet = {};
+
+	let problemWordbase = Array.from(wb);
+	problemSet.wb = shuffleWordbase(problemWordbase);
+
+	if(trackRecent == true) {
+		problemSet.recent_wb = [];
+	}
+
+	problemSet.currentProblem = 0;
+
+	problemSet.render = async function (targetElement) {
+		let problemInfo = await buildProblemInfo(this.wb[this.currentProblem], complement_wb, this.recent_wb);
+		if (this.recent_wb) {
+			let incorrectSolutions = problemInfo.solutions.filter(wordInfo => wordInfo != this.wb[this.currentProblem]);
+			incorrectSolutions.forEach(soln => updateRecentWordbase(this.recent_wb, soln));
+			console.log(this.recent_wb);
+		}
+		let problemCard = await buildProblemCard(problemInfo);
+		targetElement.appendChild(problemCard);
+		this.currentProblem ++;
+		if(this.currentProblem >= this.wb.length) {
+			shuffleWordbase(this.wb);
+			this.currentProblem = 0;
+		}
+		return;
+	}
+
+	return problemSet;
+}
+
+
+
+
+const buildProblemCard = async (problemInfo) => {
+	//build the html structure of the problem card, if it doesn't already exist
+	let problemCard = document.createElement('div');
+		problemCard.classList.add('problem-card');
+
+		let markup = `
+			<div class="target-letter"></div>
+			<div class="solutions"></div>
+		`;
+		problemCard.insertAdjacentHTML('beforeend', markup);
+
+	//put the targetLetter in the right spot
+	const targetLetterDiv = problemCard.getElementsByClassName('target-letter')[0];
+	targetLetterDiv.textContent = problemInfo.targetLetter;
+
+	const solutionsDiv = problemCard.getElementsByClassName('solutions')[0];
 	//render the solutions
 	let promises = [];
-	problem.solutions.forEach(entry => {
+	problemInfo.solutions.forEach(entry => {
 		let correct = false;
-		if (entry == problem.correctSolution) {correct = true;}
+		if (entry == problemInfo.correctSolution) {correct = true;}
 		promises.push(buildSolutionMarkup(entry, correct));
 	});
 
@@ -100,15 +156,17 @@ const renderProblem = async (problem, targetElement) => {
 
 	results.forEach(result => {
 		if (result.status == 'fulfilled') {
-			targetElement.insertAdjacentHTML('beforeend', result.value);
+			solutionsDiv.insertAdjacentHTML('beforeend', result.value);
 		} else {
 			const err = new Error(result.reason);
 			console.error(err);
 		}
 	});
+
+	return problemCard;
 }
 
-const buildProblem = async (wordInfo, complement_wb, recent_wb) => {
+const buildProblemInfo = async (wordInfo, complement_wb, recent_wb) => {
 	// get target letter from wordInfo.
 	let targetLetter = '';
 	if (!wordInfo.word) {
@@ -118,8 +176,17 @@ const buildProblem = async (wordInfo, complement_wb, recent_wb) => {
 	} else {
 		targetLetter = wordInfo.word[0];
 	}
+	//if no complement_wb specified, use the master wordbase less this problem's wordInfo
+	if (!complement_wb) {
+		let index = wordbase.indexOf(wordInfo);
+		if (index > -1) {
+			complement_wb = Array.from(wordbase);
+			complement_wb.splice(index, 1);
+		}
+	}
 	// get some more wordInfos from the complement_wb that aren't in the recent_wb
 	let possible_wb = Array.from(complement_wb);
+	console.log(possible_wb);
 	if (recent_wb) {
 		possible_wb = complement_wb.filter(entry => {
 			if (recent_wb.indexOf(entry) > -1) {
@@ -129,6 +196,7 @@ const buildProblem = async (wordInfo, complement_wb, recent_wb) => {
 			}
 		});
 	}
+	console.log(possible_wb);
 	// shuffle the possible options for words
 	possible_wb = shuffleWordbase(possible_wb);
 	let numToChoose = Math.min(PROBLEM_OPTIONS - 1, possible_wb.length);
@@ -138,12 +206,12 @@ const buildProblem = async (wordInfo, complement_wb, recent_wb) => {
 	possible_wb.push(wordInfo);
 	let solutions = shuffleWordbase(possible_wb);
 
-	let problem = {
+	let problemInfo = {
 		targetLetter,
 		solutions,
 		correctSolution: wordInfo,
 	}
-	return problem;
+	return problemInfo;
 }
 
 
@@ -256,11 +324,6 @@ const buildSolutionMarkup = (wordInfo, correct) => {
 	});
 }
 
-
-
-let solutionsDiv = document.getElementsByClassName('solutions')[0];
-
-
 const renderWordbase = async (wb, targetElement) => {
 	let promises = [];
 	wb.forEach(entry => {
@@ -281,10 +344,11 @@ const renderWordbase = async (wb, targetElement) => {
 
 
 let bases = filterWordbaseByLetter(wordbase, 'a');
-bases.matches = shuffleWordbase(bases.matches);
-buildProblem(bases.matches[0], bases.complement).then(problem => renderProblem(problem, solutionsDiv)).catch(err => console.log(err));
-// buildProblem(bases.matches[0], bases.complement).then(problem => console.log(problem)).catch(err => console.log(err));
-
+console.log(bases);
+let problemmo = buildProblemSet(bases.matches, bases.complement);
+console.log(problemmo);
+problemmo.render(document.body).then(res => problemmo.render(document.body)).catch(err => console.error(err));
+;
 </script>
 </body>
 </html>
