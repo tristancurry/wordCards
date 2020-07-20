@@ -1,0 +1,66 @@
+<html>
+<head>
+    <style>
+        :root {
+            --moon-radius: 15px;
+            --moon-q: 0.6;
+            --moon-mod-x: calc(0.5*((1 - (var(--moon-q)*(var(--moon-q))))/var(--moon-q))*var(--moon-radius));
+            /* --moon-mod-radius: calc(var(--moon-mod-x) + (var(--moon-q)*var(--moon-radius))); */
+            --moon-mod-radius: var(--moon-radius);
+
+            --moon-bright: #ffff66;
+            --moon-shadow: #00000088;
+
+        }
+
+        .sky {
+            display:flex;
+            align-items: center;
+            justify-content: center;    
+            height:400px;
+            width: 400px;
+            background-color:#220033;
+            border-radius: 200px;
+        }
+
+        .moon-disc {
+            position:absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: calc(2*var(--moon-radius));
+            width: calc(2*var(--moon-radius));
+            background-color: white;
+            border-radius: var(--moon-radius);
+            overflow: hidden;
+            transform: rotate(30deg) translate(0px,-100px);
+            font-size: 0px;
+        }
+
+        .moon-mod-shadow {
+            position:absolute;
+            top:0px;
+            height: calc(2*var(--moon-mod-radius));
+            width: calc(2*var(--moon-mod-radius));
+            background-color: var(--moon-shadow);
+            border-top-left-radius: calc((2 - var(--moon-q))*50%) 50%;
+            border-bottom-left-radius: calc((2 - var(--moon-q))*50%) 50%;
+            border-top-right-radius: calc(var(--moon-q)*50%) 50%;
+            border-bottom-right-radius: calc(var(--moon-q)*50%) 50%;
+            transform: translate3d(calc((-1 + var(--moon-q))*50%), 0, 0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="sky">
+    <div class="moon-disc">
+        <div class="moon-mod-shadow"></div>
+    </div>
+
+</div>
+
+
+
+</body>
+</html>
