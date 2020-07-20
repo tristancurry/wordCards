@@ -277,16 +277,8 @@ const renderWordbase = async (wb, targetElement) => {
 			console.error(err);
 		}
 	});
-
-	// let randomIncorrect = Math.floor((results.length)*Math.random());
-	// let solutionTexts = targetElement.getElementsByClassName('solution-text');
-	// solutionTexts[randomIncorrect].classList.remove('correct');
-	// solutionTexts[randomIncorrect].classList.add('incorrect');
-	// solutionTexts[randomIncorrect].parentNode.classList.add('selected-incorrect');
-
 }
 
-// renderWordbase(wordbase, solutionsDiv).catch(err => console.log(err));
 
 let bases = filterWordbaseByLetter(wordbase, 'a');
 bases.matches = shuffleWordbase(bases.matches);
