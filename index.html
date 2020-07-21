@@ -2,24 +2,69 @@
 <html>
 <head>
 	<title>Word Cards</title>
-	<meta http-equiv='Content-Type' content='text/html'; charset='UTF-8'>
-	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-	<meta name='theme-color' content='#999999'>
-	<meta name='Description' content='About: Flashcard quiz thing for babby, Author:Tristan Curry, Megan Curry'>
-	<link rel='manifest' href='manifest.json' />
-	<link rel='stylesheet' type='text/css' href='css/styles.css'/>
+	<meta http-equiv="Content-Type" content="text/html"; charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#999999">
+	<meta name="Description" content="About: Flashcard quiz thing for babby, Author:Tristan Curry, Megan Curry">
+	<link rel="manifest" href="manifest.json" />
+	<link rel="stylesheet" type="text/css" href="css/styles.css"/>
 </head>
 
 <body>
-	<script type='text/javascript' src='scripts/swHandling.js'></script>
+	<script type="text/javascript" src="scripts/swHandling.js"></script>
 
-	<div onclick='void(0);'>
-		<div class='update'>update ready!<button id='updateBtn'>UPDATE</button></div>
+	<div onclick="void(0);">
+		<div id="viewport">
+			<div class="background-scene"></div>
+			<div class="problem-card">
+				<div class="target-letter"></div>
+				<div class="solutions"></div>
+				<div class="result modal"</div>
+			</div>
+			<div class="training-card"></div>
+			<div class="update">update ready!<button id="updateBtn">UPDATE</button></div>
+		</div>
 	</div>
 
 <script type="text/javascript">
 const MAX_RECENT_WORDS = 6;
 const PROBLEM_OPTIONS = 3;
+const solutionsDiv = document.getElementsByClassName('solutions')[0];
+
+solutionsDiv.addEventListener('click', event => {
+	let t = event.target;
+	if (t.classList.contains('solution-image')) {
+		handleSolutionAttempt(t);
+	}
+});
+
+const handleSolutionAttempt = solutionImage => {
+		solutionText = solutionImage.parentNode.getElementsByClassName('solution-text')[0];
+		if (solutionText.classList.contains('correct')) {
+			//do things for a correct response
+			//show all solutionTexts.
+			let solutionTexts = solutionsDiv.getElementsByClassName('solution-text');
+			let solutionImages = solutionsDiv.getElementsByClassName('solution-image');
+
+			for (let i = 0, l = solutionTexts.length; i < l; i++) {
+				solutionTexts[i].classList.remove('noshow');
+				if(solutionTexts[i] != solutionText) {
+					solutionImages[i].classList.add('selected-incorrect');
+				} else {
+					solutionText.parentNode.classList.add('selected-correct');
+				}
+			}
+			alert('Correct!');
+		} else {
+			//do things for an incorrect response
+			//show solution text.
+			solutionText.classList.remove('noshow');
+			//grey out the image
+			solutionImage.classList.add('selected-incorrect');
+			alert('Incorrect!');
+		}
+}
+
 
 const alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 
@@ -83,21 +128,10 @@ const updateRecentWordbase = (recent_wb, wordInfo, max = MAX_RECENT_WORDS) => {
 	return;
 }
 
-//need an object to hold onto...
-//a wordbase from which problems are drawn
-//a complement_wb (if any)
-//a recent_wb (if any)
-//DOM element for rendering into
-
-//filter wordbase according to target letter. -store
-//shuffle matches - store shallow copy of matches
-
-
-const buildProblemSet = (wb, complement_wb, trackRecent = true) => {
+const buildProblemSet = async (wb, complement_wb, trackRecent = true) => {
 	let problemSet = {};
-
 	let problemWordbase = Array.from(wb);
-	problemSet.wb = shuffleWordbase(problemWordbase);
+	problemSet.wb = shuffleArray(problemWordbase);
 
 	if(trackRecent == true) {
 		problemSet.recent_wb = [];
@@ -105,45 +139,43 @@ const buildProblemSet = (wb, complement_wb, trackRecent = true) => {
 
 	problemSet.currentProblem = 0;
 
-	problemSet.render = async function (targetElement) {
-		let problemInfo = await buildProblemInfo(this.wb[this.currentProblem], complement_wb, this.recent_wb);
-		if (this.recent_wb) {
-			let incorrectSolutions = problemInfo.solutions.filter(wordInfo => wordInfo != this.wb[this.currentProblem]);
-			incorrectSolutions.forEach(soln => updateRecentWordbase(this.recent_wb, soln));
-			console.log(this.recent_wb);
+	problemSet.generate = async function () {
+		this.currentProblem = 0;
+		this.problems = [];
+		for (let i = 0, l = problemWordbase.length; i < l; i++) {
+			let problemInfo = buildProblemInfo(this.wb[i], complement_wb, this.recent_wb);
+			this.problems.push(problemInfo);
+			if (this.recent_wb) {
+				let incorrectSolutions = problemInfo.solutions.filter(wordInfo => wordInfo != this.wb[i]);
+				incorrectSolutions.forEach(solution => updateRecentWordbase(this.recent_wb, solution));
+			}
 		}
-		let problemCard = await buildProblemCard(problemInfo);
-		targetElement.appendChild(problemCard);
+		return this;
+	}
+
+	problemSet.render = async function (targetElement) {
+		let problemInfo = this.problems[this.currentProblem];
+		let problemCard = await renderProblem(problemInfo);
 		this.currentProblem ++;
 		if(this.currentProblem >= this.wb.length) {
-			shuffleWordbase(this.wb);
-			this.currentProblem = 0;
+			await this.generate();
 		}
 		return;
 	}
-
 	return problemSet;
 }
 
 
 
 
-const buildProblemCard = async (problemInfo) => {
+const renderProblem = async (problemInfo, targetProblemCard = document.getElementsByClassName('problem-card')[0]) => {
 	//build the html structure of the problem card, if it doesn't already exist
-	let problemCard = document.createElement('div');
-		problemCard.classList.add('problem-card');
-
-		let markup = `
-			<div class="target-letter"></div>
-			<div class="solutions"></div>
-		`;
-		problemCard.insertAdjacentHTML('beforeend', markup);
 
 	//put the targetLetter in the right spot
-	const targetLetterDiv = problemCard.getElementsByClassName('target-letter')[0];
+	const targetLetterDiv = targetProblemCard.getElementsByClassName('target-letter')[0];
 	targetLetterDiv.textContent = problemInfo.targetLetter;
 
-	const solutionsDiv = problemCard.getElementsByClassName('solutions')[0];
+	const solutionsDiv = targetProblemCard.getElementsByClassName('solutions')[0];
 	//render the solutions
 	let promises = [];
 	problemInfo.solutions.forEach(entry => {
@@ -153,7 +185,10 @@ const buildProblemCard = async (problemInfo) => {
 	});
 
 	const results = await Promise.allSettled(promises);
-
+	//Clear any already present solutions
+	while (solutionsDiv.firstChild) {
+		solutionsDiv.removeChild(solutionsDiv.firstChild);
+	}
 	results.forEach(result => {
 		if (result.status == 'fulfilled') {
 			solutionsDiv.insertAdjacentHTML('beforeend', result.value);
@@ -163,10 +198,10 @@ const buildProblemCard = async (problemInfo) => {
 		}
 	});
 
-	return problemCard;
+	return;
 }
 
-const buildProblemInfo = async (wordInfo, complement_wb, recent_wb) => {
+const buildProblemInfo = (wordInfo, complement_wb, recent_wb) => {
 	// get target letter from wordInfo.
 	let targetLetter = '';
 	if (!wordInfo.word) {
@@ -186,7 +221,6 @@ const buildProblemInfo = async (wordInfo, complement_wb, recent_wb) => {
 	}
 	// get some more wordInfos from the complement_wb that aren't in the recent_wb
 	let possible_wb = Array.from(complement_wb);
-	console.log(possible_wb);
 	if (recent_wb) {
 		possible_wb = complement_wb.filter(entry => {
 			if (recent_wb.indexOf(entry) > -1) {
@@ -196,15 +230,14 @@ const buildProblemInfo = async (wordInfo, complement_wb, recent_wb) => {
 			}
 		});
 	}
-	console.log(possible_wb);
 	// shuffle the possible options for words
-	possible_wb = shuffleWordbase(possible_wb);
+	possible_wb = shuffleArray(possible_wb);
 	let numToChoose = Math.min(PROBLEM_OPTIONS - 1, possible_wb.length);
 
 	//pick the appropriate number of options, starting at the top of possible_wb
 	possible_wb = possible_wb.slice(0, numToChoose);
 	possible_wb.push(wordInfo);
-	let solutions = shuffleWordbase(possible_wb);
+	let solutions = shuffleArray(possible_wb);
 
 	let problemInfo = {
 		targetLetter,
@@ -241,9 +274,9 @@ const alphabetiseWordbase = wb => {
 
 
 
-const shuffleWordbase = wb => {
+const shuffleArray = arr => {
 	//make shallow copy of original wordbase
-	let shuff = Array.from(wb);
+	let shuff = Array.from(arr);
 	let currentIndex = shuff.length;
 	let swapnil, randomIndex;
 
@@ -311,7 +344,7 @@ const buildSolutionMarkup = (wordInfo, correct) => {
 			else if (correct === false) {solutionTextClassName += ' incorrect'}
 			let	markup = `<div class="solution">
 					<div class='solution-image'>${modChar}</div>
-					<div class="${solutionTextClassName}">${wordInfo.word}</div>
+					<div class="${solutionTextClassName} noshow">${wordInfo.word}</div>
 				</div>`;
 			resolve (markup);
 		} else {
@@ -344,11 +377,8 @@ const renderWordbase = async (wb, targetElement) => {
 
 
 let bases = filterWordbaseByLetter(wordbase, 'a');
-console.log(bases);
 let problemmo = buildProblemSet(bases.matches, bases.complement);
-console.log(problemmo);
-problemmo.render(document.body).then(res => problemmo.render(document.body)).catch(err => console.error(err));
-;
+problemmo.then(p => p.generate()).then(p => p.render()).catch(err => console.error(err));
 </script>
 </body>
 </html>
