@@ -51,21 +51,17 @@ const handleSolutionAttempt = solutionImage => {
 				if(solutionTexts[i] != solutionText) {
 					solutionImages[i].classList.add('selected-incorrect');
 				} else {
-					solutionText.parentNode.classList.add('selected-correct');
+					solutionImage.classList.add('selected-correct');
 				}
 			}
-			alert('Correct!');
 		} else {
 			//do things for an incorrect response
 			//show solution text.
 			solutionText.classList.remove('noshow');
 			//grey out the image
 			solutionImage.classList.add('selected-incorrect');
-			alert('Incorrect!');
 		}
 }
-
-
 const alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 
 const skinCodes = [
@@ -189,9 +185,18 @@ const renderProblem = async (problemInfo, targetProblemCard = document.getElemen
 	while (solutionsDiv.firstChild) {
 		solutionsDiv.removeChild(solutionsDiv.firstChild);
 	}
+
+	let side = 0;
 	results.forEach(result => {
 		if (result.status == 'fulfilled') {
 			solutionsDiv.insertAdjacentHTML('beforeend', result.value);
+			let solns = solutionsDiv.getElementsByClassName('solution');
+			let thisSoln = solns[solns.length - 1];
+			let thisSolnImage = thisSoln.getElementsByClassName('solution-image')[0];
+			if(side == 1) {
+				thisSoln.style.alignSelf = 'flex-start';
+			}
+			side = (side + 1)%2;
 		} else {
 			const err = new Error(result.reason);
 			console.error(err);

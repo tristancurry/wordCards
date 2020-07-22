@@ -1,13 +1,18 @@
 :root {
-	--colour-correct: magenta;
+	--colour-correct: #008800;
 	--colour-incorrect: blue;
-
+	--colour-solution-image: #eeeeff;
 	font-family: Arial, Helvetica, sans-serif;
 }
 
 
-.div {
+div {
+	user-select: none;
+}
 
+.viewport {
+	height: 100%;
+	overflow: hidden;
 }
 
 .update {
@@ -18,15 +23,27 @@
 	display:block;
 }
 
+.problem-card {
+	height: 100%;
+	width: 100%;
+}
+
 .target-letter {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
 	font-size: 100pt;
+	height: 20%;
 }
 
 .solutions {
+	padding: 100px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	width: 80%;
+	height: auto;
 	margin: auto;
 	border: 1px solid black;
 	background-image: linear-gradient(to bottom left, #ffdddd, #ddddff);
@@ -37,17 +54,31 @@
 	flex-basis: content;
 	flex-direction: column;
 	align-items: center;
-	width: 50%;
-	border: 1px solid white;
+	align-self: flex-end;
+	width: 25%;
+	/* border: 1px solid white; */
 	border-radius: 20px;
+	margin: 70px;
+	margin-top: -70px;
+	margin-bottom: -70px;
+	user-select: none;
 }
 
 .solution-image {
-	font-size: 72pt;
+	height: 33%;
+	width: height;
+	display:flex;
 	flex-grow: 0;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--colour-solution-image);
+	border-radius: 150px;
+	box-shadow: 0px 10px 15px #99999999;
+	font-size: 100pt;
 }
 
 .solution-text {
+	padding: 20px;
 	font-size: 42pt;
 	color: black;
 }
@@ -68,25 +99,32 @@
 	opacity: 0.5;
 	pointer-events: none;
 	animation: none;
+	box-shadow: none;
+	background-color: transparent;
 }
 
 .solution-container {
-
 }
 
 .selected-correct {
-	animation: anim-glory;
+	animation-name: anim-glory;
 	animation-direction: alternate;
-	animation-duration: 0.5s;
+	animation-duration: 0.7s;
 	animation-iteration-count: infinite;
 	animation-timing-function: ease-in-out;
 }
 
-.noshow {
+.offscreen {
 	position: absolute;
 	top: -9999px;
 	left: -9999px;
 }
+
+.noshow {
+	opacity: 0;
+}
+
+
 
 @keyframes anim-glory {
 	from {box-shadow: 0px 0px 20px var(--colour-correct);}
