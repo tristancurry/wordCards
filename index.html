@@ -97,7 +97,7 @@ const wordbase = [
 	{word: 'apple', syl: 2, char: '🍎'},
 	{word: 'banana', syl: 3, char: '🍌'},
 	{word: 'car', syl: 1, char: '🚗'},
-	{word: 'plane', syl: 1, char: '✈️'},
+	{word: 'ambulance', syl: 3, char: '🚑'},
 	{word: 'astronaut', syl: 3, char: '&zwj;🚀', skin: true, gender: true},
 ];
 
@@ -187,6 +187,7 @@ const renderProblem = async (problemInfo, targetProblemCard = document.getElemen
 	}
 
 	let side = 0;
+	if (Math.random() >= 0.5) {side = 1;}
 	results.forEach(result => {
 		if (result.status == 'fulfilled') {
 			solutionsDiv.insertAdjacentHTML('beforeend', result.value);

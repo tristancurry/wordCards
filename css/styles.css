@@ -23,6 +23,8 @@ div {
 
 .update {
 	display:none;
+	position: absolute;
+	top: 0px;
 }
 
 .show {
@@ -79,7 +81,7 @@ div {
 }
 
 .solution-text {
-	font-size: 8vh;
+	font-size: 6vh;
 	color: black;
 }
 
