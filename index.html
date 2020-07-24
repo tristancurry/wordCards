@@ -31,7 +31,7 @@ const MAX_RECENT_WORDS = 6;
 const PROBLEM_OPTIONS = 3;
 const solutionsDiv = document.getElementsByClassName('solutions')[0];
 
-solutionsDiv.addEventListener('click', event => {
+solutionsDiv.addEventListener('mousedown', event => {
 	let t = event.target;
 	if (t.classList.contains('solution-image')) {
 		handleSolutionAttempt(t);
