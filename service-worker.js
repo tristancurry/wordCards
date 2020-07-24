@@ -1,5 +1,7 @@
-let CACHE_NAME = 'wordcards-cache-006';
+let CACHE_NAME = 'wordcards-cache-007';
 let urlsToCache = [
+	'index.html',
+	'css/styles.css',
 	'scripts/swHandling.js'
 ];
 
