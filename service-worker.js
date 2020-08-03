@@ -1,4 +1,4 @@
-let CACHE_NAME = 'wordcards-cache-008';
+let CACHE_NAME = 'wordcards-cache-010';
 let urlsToCache = [
 	'index.html',
 	'css/styles.css',
@@ -11,7 +11,7 @@ self.addEventListener('install', function(event) {
     caches.open(CACHE_NAME)
       .then(function(cache) {
         return cache.addAll(urlsToCache);
-      })
+      });
   );
 });
 
