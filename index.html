@@ -34,8 +34,13 @@ const solutionsDiv = document.getElementsByClassName('solutions')[0];
 solutionsDiv.addEventListener('touchend', event => {
 	event.preventDefault();
 	let t = event.target;
-	if (t.classList.contains('solution-image')) {
-		handleSolutionAttempt(t);
+	let touches = event.changedTouches;
+	for (let i = 0, l = touches.length; i < l; i++) {
+		let thisTouch = touches[i];
+		if (thisTouch.target.classList.contains('solution-image')) {
+			handleSolutionAttempt(thisTouch.target);
+			break;
+		}
 	}
 });
 

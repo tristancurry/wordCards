@@ -1,4 +1,4 @@
-let CACHE_NAME = 'wordcards-cache-010';
+let CACHE_NAME = 'wordcards-cache-011';
 let urlsToCache = [
 	'index.html',
 	'css/styles.css',
