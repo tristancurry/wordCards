@@ -5,6 +5,14 @@
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+html {
+	height: 100%;
+}
+
+body {
+	overscroll-behaviour-y: contain;
+}
+
 
 div {
 	user-select: none;
