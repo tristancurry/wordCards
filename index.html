@@ -68,6 +68,13 @@ const handleSolutionAttempt = solutionImage => {
 					solutionImage.classList.add('selected-correct');
 				}
 			}
+			// make a 'next button' visible
+			// for now...just advance to next problem after a short delay.
+			problemSet.then(async p => {
+				await delay(3000);
+				return p;
+			}).then(p => p.render()).catch(err => console.error(err));
+			// advance a 'progress bar'
 		} else {
 			//do things for an incorrect response
 			//show solution text.
@@ -170,7 +177,7 @@ const buildProblemSet = async (wb, complement_wb, trackRecent = true) => {
 		if(this.currentProblem >= this.wb.length) {
 			await this.generate();
 		}
-		return;
+		return this;
 	}
 	return problemSet;
 }
@@ -397,8 +404,10 @@ const renderWordbase = async (wb, targetElement) => {
 
 
 let bases = filterWordbaseByLetter(wordbase, 'a');
-let problemmo = buildProblemSet(bases.matches, bases.complement);
-problemmo.then(p => p.generate()).then(p => p.render()).catch(err => console.error(err));
+
+let problemSet = buildProblemSet(bases.matches, bases.complement);
+problemSet.then(p => p.generate()).then(p => p.render()).catch(err => console.error(err));
+
 </script>
 </body>
 </html>
