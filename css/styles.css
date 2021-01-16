@@ -65,15 +65,25 @@ div {
 }
 
 .solution {
+	position:absolute;
+	transform-origin:100% 100%;
+	overflow: hidden;
+	left: 50%;
+	top: 50%;
 	display:flex;
+	transform: skew(-50deg) rotate(-70deg) scale(1);
 	/* flex-basis: content; */
 	flex-direction: column;
 	align-items: center;
 	align-self: flex-end;
 	width: auto;
-	/* border: 1px solid white; */
+	border: 1px solid white;
 	user-select: none;
 	margin-bottom: -13vh;
+}
+
+.solution div {
+
 }
 
 .solution-image {
